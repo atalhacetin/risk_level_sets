@@ -1,30 +1,46 @@
-clear; 
-% 1d plot
-mu = 1;
-sigma = 1;
-x_e = 0:0.1:10;
-p = exp(-sigma*(x_e-mu).^2);
-figure(1); clf;
-plot(x_e,p)
+clear; clc;
 
-% 2d plot
-x_i = [5;5]; % xi
+
+x_list = [5,10; 10,];
+xdot_list = [10,0;];
 Sigma =[1,0;0,1];
-interval = 1;
+interval = 0.1;
+a =1;
+q_x = 0:interval:20;
+q_y = 0:interval:20;
+P = zeros(length(q_x), length(q_y));
+inv_sigma = inv(Sigma);
+abs_det_sigma = abs(det(Sigma));
+for i=1:length(q_x)
+    for j=1:length(q_y)
+        p_sum = 0;
+        for k=1:length(x_list(:,1))
+            x_i=[x_list(k,1);x_list(k,2)];
+            x_i_dot = [xdot_list(k,1);xdot_list(k,2)];
 
-x_pos_list = 0:10;
-y_pos_list = 0:10;
-P = zeros(length(x_pos_list), length(y_pos_list));
-for i=1:length(x_pos_list)
-    for j=1:length(y_pos_list)
-
-        x_e = [x_pos_list(i); y_pos];
-        p = exp(-0.5*transpose(x_e - x_i)*inv(Sigma)*(x_e - x_i)) / sqrt(abs(det(Sigma)) * (2*pi)^2);
-    
+            q = [q_x(i); q_y(j)];
+            p = exp(-0.5*transpose(q - x_i)*inv_sigma*(q - x_i));
+            p = p  / (1 + exp(-a * (transpose(x_i_dot)) * (q - x_i)));
+            p_sum = p_sum+p;
+        end
+        P(j,i) = p_sum;
     end
 end
 
+[X,Y] = meshgrid(q_x, q_y);
+
+
+figure(1); clf;
+plot(x_list)
+quiver(xdot_list(:,1), xdot_list(:,2))
 figure(2); clf;
+plevs =  0:0.01:0.04;
+contourf(X,Y,P, plevs); hold on
+scatter(x_list(:,1), x_list(:,2), "LineWidth",2, 'MarkerFaceColor', 'b')
+quiver(x_list(:,1), x_list(:,2), xdot_list(:,1), xdot_list(:,2))
+xlabel("x")
+
+
 
 
 

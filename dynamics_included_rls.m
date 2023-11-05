@@ -1,0 +1,55 @@
+clear; clc;
+
+
+% Define Positions and Velocities
+% x_list = [50,50;];
+% xdot_list = [150,0;];
+% xddot_list = [0,100];
+x = [50,50];
+xdot = [200,0];
+pull_upG = 5;
+T = 3;
+N = 30;
+dt = T/N;
+
+x_list = zeros(N,2); xdot_list = zeros(N,2);
+x_list(1,:) = x; xdot_list(1,:) = xdot;
+for i=1:N
+    vel_diagonal_vector = [-xdot(2),xdot(1)] / vecnorm(xdot);
+    acc_vector = vel_diagonal_vector* pull_upG * 9.81;
+    x = x + xdot * dt + 0.5*acc_vector *dt*dt;
+    xdot = xdot + acc_vector*dt;
+    x_list(i,:) = x; xdot_list(i,:) =xdot;
+end
+
+sigma =[0.01,0;0,1] / 100 ;
+
+
+
+
+alpha_vel = 1;
+alpha_acc = 1;
+interval = 5;
+q_x = 0:interval:1000;
+q_y = 0:interval:1000;
+Q = [q_x;q_y];
+
+P = constructRiskLevels(Q, x_list, xdot_list,sigma, alpha_vel);
+[X,Y] = meshgrid(q_x, q_y);
+
+
+figure(2); clf;
+plevs =  [0.005, 0.02, 0.1];
+contourf(X,Y,P,plevs); hold on
+scatter(x_list(:,1), x_list(:,2), "LineWidth",2, 'MarkerFaceColor', 'b')
+quiver(x_list(:,1), x_list(:,2), xdot_list(:,1), xdot_list(:,2),0.2, 'LineWidth',2)
+xlabel("x")
+ylabel("z")
+
+
+
+
+
+
+
+
